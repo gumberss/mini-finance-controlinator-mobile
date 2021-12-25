@@ -1,6 +1,10 @@
 import 'package:date_field/date_field.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:jiffy/jiffy.dart';
+import 'package:mini_finance_mobile/piggy_banks/models/piggy_bank.dart';
+import 'package:mini_finance_mobile/piggy_banks/piggy_banks_services/PiggyBankService.dart';
+import 'package:uuid/uuid.dart';
 
 class PiggyBankForm extends StatefulWidget {
   @override
@@ -8,6 +12,11 @@ class PiggyBankForm extends StatefulWidget {
 }
 
 class PiggyBankFormState extends State<PiggyBankForm> {
+  final TextEditingController _nameCtrl = TextEditingController();
+  final TextEditingController _goalValueCtrl = TextEditingController();
+  final TextEditingController _goalDateCtrl = TextEditingController();
+  final TextEditingController alreadySavedCtrl = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,28 +28,31 @@ class PiggyBankFormState extends State<PiggyBankForm> {
           padding: const EdgeInsets.all(8),
           child: Column(
             children: [
-              const Padding(
-                padding: EdgeInsets.all(8),
+              Padding(
+                padding: const EdgeInsets.all(8),
                 child: TextField(
+                  controller: _nameCtrl,
                   decoration: InputDecoration(labelText: "Name"),
                 ),
               ),
-              const Padding(
+              /* const Padding(
                 padding: EdgeInsets.all(8),
                 child: TextField(
                   decoration: InputDecoration(labelText: "Description"),
                 ),
-              ),
-              const Padding(
+              ),*/
+              Padding(
                   padding: EdgeInsets.all(8),
                   child: TextField(
+                    controller: _goalValueCtrl,
                     decoration: InputDecoration(
                         labelText: "Goal", hintText: "100.000,00"),
                     keyboardType: TextInputType.number,
                   )),
-              const Padding(
+              Padding(
                 padding: EdgeInsets.all(8),
                 child: TextField(
+                  controller: alreadySavedCtrl,
                   decoration: InputDecoration(
                       labelText: "Already Saved", hintText: "50,00"),
                   keyboardType: TextInputType.number,
@@ -64,7 +76,10 @@ class PiggyBankFormState extends State<PiggyBankForm> {
                       ? 'Select a date after today'
                       : null,
                   onDateSelected: (DateTime value) {
-                    print(value);
+                    debugPrint(value.toIso8601String());
+                    _goalDateCtrl.text =
+                        value.millisecondsSinceEpoch.toString();
+                    setState(() {});
                   },
                 ),
               ),
@@ -73,13 +88,33 @@ class PiggyBankFormState extends State<PiggyBankForm> {
                 child: SizedBox(
                   width: double.maxFinite,
                   child: ElevatedButton(
-                      onPressed: () {
-                        //final String? name = _nameController.text;
-                        //final int? accountNumber = int.tryParse(_accountNumberController.text);
-                        //if (name != null && accountNumber != null) {
-                        //  final contact = Contact(1, name, accountNumber);
-                        //  Navigator.pop(context, contact);
-                        // }
+                      onPressed: () async {
+                        final String? name = _nameCtrl.text;
+
+                        var goalDateMilliseconds =
+                            int.tryParse(_goalDateCtrl.text);
+
+                        final double? goalValue =
+                            double.tryParse(_goalValueCtrl.text);
+                        final double? savedValue =
+                            double.tryParse(alreadySavedCtrl.text);
+                        final DateTime startDate = DateTime.now();
+
+                        if (name == null ||
+                            goalValue == null ||
+                            savedValue == null ||
+                            goalDateMilliseconds == null) return;
+
+                        final DateTime? goalDate =
+                            DateTime.fromMillisecondsSinceEpoch(
+                                goalDateMilliseconds);
+
+                        var piggyBank = PiggyBank(Uuid().v1(), name, savedValue,
+                            startDate, goalValue, goalDate!);
+
+                        if (await PiggyBankService().postPiggyBank(piggyBank)) {
+                          Navigator.pop(context);
+                        }
                       },
                       child: Text('Create')),
                 ),

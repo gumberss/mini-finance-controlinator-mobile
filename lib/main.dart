@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:mini_finance_mobile/piggy_banks/screens/piggy_bank_list.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+void main() async {
+  await dotenv.load(fileName: ".env");
   runApp(App());
 }
 class App extends StatelessWidget{
