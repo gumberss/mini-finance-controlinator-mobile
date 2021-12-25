@@ -95,7 +95,10 @@ class PiggyBankCard extends StatelessWidget {
       child: Material(
         color: Theme.of(context).colorScheme.surface,
         child: InkWell(
-          onTap: () {},
+          onTap: () {
+            Navigator.of(context)
+                .push(MaterialPageRoute(builder: (context) => PiggyBankForm(piggyBank: _piggyBank,)));
+          },
           child: PiggyBankCardContent(_piggyBank),
         ),
       ),
@@ -122,8 +125,7 @@ class PiggyBankCardContent extends StatelessWidget {
               Text(
                 _piggyBank.name,
                 style: TextStyle(fontSize: 24),
-              ),
-              Icon(Icons.edit)
+              )
             ],
           ),
           PiggyBankDateData(_piggyBank),

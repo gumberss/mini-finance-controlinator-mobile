@@ -1,14 +1,18 @@
 import 'package:date_field/date_field.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:jiffy/jiffy.dart';
 import 'package:mini_finance_mobile/piggy_banks/models/piggy_bank.dart';
 import 'package:mini_finance_mobile/piggy_banks/piggy_banks_services/PiggyBankService.dart';
 import 'package:uuid/uuid.dart';
 
 class PiggyBankForm extends StatefulWidget {
+  final PiggyBank? piggyBank;
+
+  PiggyBankForm({this.piggyBank});
+
   @override
-  State<StatefulWidget> createState() => PiggyBankFormState();
+  State<StatefulWidget> createState() =>
+      PiggyBankFormState(piggyBank: piggyBank);
 }
 
 class PiggyBankFormState extends State<PiggyBankForm> {
@@ -17,8 +21,21 @@ class PiggyBankFormState extends State<PiggyBankForm> {
   final TextEditingController _goalDateCtrl = TextEditingController();
   final TextEditingController alreadySavedCtrl = TextEditingController();
 
+  final PiggyBank? piggyBank;
+
+  PiggyBankFormState({this.piggyBank});
+
   @override
   Widget build(BuildContext context) {
+    DateTime? goalDate = null;
+    if (piggyBank != null) {
+      _nameCtrl.text = piggyBank!.name;
+      _goalValueCtrl.text = piggyBank!.goalValue.toString();
+      _goalDateCtrl.text = piggyBank!.goalDate.millisecondsSinceEpoch.toString();
+      alreadySavedCtrl.text = piggyBank!.savedValue.toString();
+      goalDate = piggyBank!.goalDate;
+    }
+
     return Scaffold(
         appBar: AppBar(
           title: const Text("Piggy Bank Form"),
@@ -70,7 +87,10 @@ class PiggyBankFormState extends State<PiggyBankForm> {
                   ),
                   mode: DateTimeFieldPickerMode.date,
                   autovalidateMode: AutovalidateMode.onUserInteraction,
-                  firstDate: DateTime.now(),
+                  firstDate: DateTime.now().add(const Duration(days: 1)),
+                  initialDate: goalDate ?? DateTime.now(),
+                  initialValue: goalDate ?? DateTime.now(),
+
                   validator: (e) => ((e?.millisecondsSinceEpoch ?? 0) <=
                           DateTime.now().millisecondsSinceEpoch)
                       ? 'Select a date after today'
