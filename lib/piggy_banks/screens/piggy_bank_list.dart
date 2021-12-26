@@ -180,6 +180,10 @@ class PiggyBankDateData extends StatelessWidget {
   Widget build(BuildContext context) {
     final dateFormat = new DateFormat('dd-MM-yyyy');
 
+    var monthsToGo = Jiffy(_piggyBank.goalDate)
+        .diff(_piggyBank.startDate, Units.MONTH)
+        .toString();
+
     return Padding(
       padding: EdgeInsets.only(top: 8, bottom: 8),
       child: Row(
@@ -188,10 +192,8 @@ class PiggyBankDateData extends StatelessWidget {
           Text(dateFormat.format(_piggyBank.startDate),
               style: TextStyle(fontSize: 16)),
           Icon(Icons.arrow_forward_outlined),
-          Text(
-              Jiffy(_piggyBank.goalDate)
-                  .diff(_piggyBank.startDate, Units.MONTH)
-                  .toString(),
+          Text("$monthsToGo Months"
+              ,
               style: TextStyle(fontSize: 16)),
           Icon(Icons.arrow_forward_outlined),
           Text(dateFormat.format(_piggyBank.goalDate),
@@ -227,7 +229,7 @@ class PiggyBankMoneyData extends StatelessWidget {
           Text(_piggyBank.savedValue.toString(),
               style: TextStyle(fontSize: 16)),
           Icon(Icons.arrow_forward_outlined),
-          Text("$differenceByMonth/Mês", style: TextStyle(fontSize: 16)),
+          Text("$differenceByMonth/Month", style: TextStyle(fontSize: 16)),
           Icon(Icons.arrow_forward_outlined),
           Text(_piggyBank.goalValue.toString(), style: TextStyle(fontSize: 16)),
         ],
