@@ -7,7 +7,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class PiggyBankService {
   Future<List<PiggyBank>> GetAll() async {
-    return List.empty();
     try {
       var result = await get(Uri.https(
           dotenv.env['PIGGY_BANK_API_URL'].toString(),
