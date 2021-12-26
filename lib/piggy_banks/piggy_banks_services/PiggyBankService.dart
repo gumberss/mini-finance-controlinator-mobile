@@ -7,6 +7,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class PiggyBankService {
   Future<List<PiggyBank>> GetAll() async {
+    return List.empty();
     try {
       var result = await get(Uri.https(
           dotenv.env['PIGGY_BANK_API_URL'].toString(),
@@ -45,6 +46,23 @@ class PiggyBankService {
             'Content-Type': 'application/json; charset=UTF-8',
           },
           body: jsonEncode(piggyBank.toJson()));
+      debugPrint(result.body.toString());
+      return true;
+    } on Exception catch (e) {
+      debugPrint(e.toString());
+      return false;
+    }
+  }
+
+  Future<bool> deletePiggyBank(PiggyBank piggyBank) async {
+    try {
+      var result = await delete(
+          Uri.https(dotenv.env['PIGGY_BANK_API_URL'].toString(),
+              dotenv.env['PIGGY_BANK_API_PATH'].toString()),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode({'id': piggyBank.id}));
       debugPrint(result.body.toString());
       return true;
     } on Exception catch (e) {

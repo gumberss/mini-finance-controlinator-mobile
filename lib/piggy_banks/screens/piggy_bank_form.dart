@@ -1,5 +1,4 @@
 import 'package:date_field/date_field.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mini_finance_mobile/piggy_banks/models/piggy_bank.dart';
 import 'package:mini_finance_mobile/piggy_banks/piggy_banks_services/PiggyBankService.dart';
@@ -68,7 +67,7 @@ class PiggyBankFormState extends State<PiggyBankForm> {
                   child: TextField(
                     controller: _goalValueCtrl,
                     decoration: InputDecoration(
-                        labelText: "Goal", hintText: "100.000,00"),
+                        labelText: "Goal", hintText: "100,000.00"),
                     keyboardType: TextInputType.number,
                   )),
               Padding(
@@ -76,7 +75,7 @@ class PiggyBankFormState extends State<PiggyBankForm> {
                 child: TextField(
                   controller: alreadySavedCtrl,
                   decoration: InputDecoration(
-                      labelText: "Already Saved", hintText: "50,00"),
+                      labelText: "Already Saved", hintText: "50.00"),
                   keyboardType: TextInputType.number,
                 ),
               ),
@@ -110,46 +109,79 @@ class PiggyBankFormState extends State<PiggyBankForm> {
                 padding: const EdgeInsets.only(top: 24.0),
                 child: SizedBox(
                   width: double.maxFinite,
-                  child: ElevatedButton(
-                      onPressed: () async {
-                        final String? name = _nameCtrl.text;
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      if (piggyBank != null)
+                        Expanded(
+                            flex: 2,
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 8, left: 8),
+                              child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                      primary: Colors.redAccent),
+                                  onPressed: () async {
+                                    if (await PiggyBankService()
+                                        .deletePiggyBank(piggyBank!)) {
+                                      Navigator.pop(context);
+                                    }
+                                  },
+                                  child: Text('Remove')),
+                            )),
+                      Expanded(
+                          flex: 2,
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 8, left: 8),
+                            child: ElevatedButton(
+                                onPressed: () async {
+                                  final String? name = _nameCtrl.text;
 
-                        final double? goalValue =
-                            double.tryParse(_goalValueCtrl.text);
-                        final double? savedValue =
-                            double.tryParse(alreadySavedCtrl.text);
-                        final DateTime startDate = DateTime.now();
+                                  final double? goalValue =
+                                      double.tryParse(_goalValueCtrl.text);
+                                  final double? savedValue =
+                                      double.tryParse(alreadySavedCtrl.text);
+                                  final DateTime startDate = DateTime.now();
 
-                        if (name == null ||
-                            goalValue == null ||
-                            savedValue == null ||
-                            goalDateMilliseconds == null) return;
+                                  if (name == null ||
+                                      goalValue == null ||
+                                      savedValue == null ||
+                                      goalDateMilliseconds == null) return;
 
-                        final DateTime? goalDate =
-                            DateTime.fromMillisecondsSinceEpoch(
-                                goalDateMilliseconds!);
+                                  final DateTime? goalDate =
+                                      DateTime.fromMillisecondsSinceEpoch(
+                                          goalDateMilliseconds!);
 
-                        if (this.piggyBank == null) {
-                          var piggyBank = PiggyBank(Uuid().v1(), name,
-                              savedValue, startDate, goalValue, goalDate!);
+                                  if (piggyBank == null) {
+                                    var piggyBank = PiggyBank(
+                                        Uuid().v1(),
+                                        name,
+                                        savedValue,
+                                        startDate,
+                                        goalValue,
+                                        goalDate!);
 
-                          if (await PiggyBankService()
-                              .postPiggyBank(piggyBank)) {
-                            Navigator.pop(context);
-                          }
-                        } else {
-                          piggyBank!.goalDate = goalDate!;
-                          piggyBank!.goalValue = goalValue;
-                          piggyBank!.savedValue = savedValue;
-                          piggyBank!.name = name;
+                                    if (await PiggyBankService()
+                                        .postPiggyBank(piggyBank)) {
+                                      Navigator.pop(context);
+                                    }
+                                  } else {
+                                    piggyBank!.goalDate = goalDate!;
+                                    piggyBank!.goalValue = goalValue;
+                                    piggyBank!.savedValue = savedValue;
+                                    piggyBank!.name = name;
 
-                          if (await PiggyBankService()
-                              .putPiggyBank(piggyBank!)) {
-                            Navigator.pop(context);
-                          }
-                        }
-                      },
-                      child: Text('Create')),
+                                    if (await PiggyBankService()
+                                        .putPiggyBank(piggyBank!)) {
+                                      Navigator.pop(context);
+                                    }
+                                  }
+                                },
+                                child: piggyBank != null
+                                    ? Text('Edit')
+                                    : Text('Create')),
+                          ))
+                    ],
+                  ),
                 ),
               )
             ],

@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mini_finance_mobile/piggy_banks/models/piggy_bank.dart';
 import 'package:mini_finance_mobile/piggy_banks/piggy_banks_services/PiggyBankService.dart';
+import 'package:mini_finance_mobile/piggy_banks/screens/piggy_bank_change_money.dart';
 import 'package:mini_finance_mobile/piggy_banks/screens/piggy_bank_form.dart';
 import 'package:intl/intl.dart';
 
@@ -16,20 +17,48 @@ class PiggyBankList extends StatefulWidget {
 }
 
 class PiggyBankListState extends State<PiggyBankList> {
+  void notifyList() {
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text("Piggy Banks"),
       ),
-      body: PiggyBankCardList(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.of(context)
-              .push(MaterialPageRoute(builder: (context) => PiggyBankForm()))
-              .then((value) => setState(() {}));
-        },
-        child: Icon(Icons.add),
+      body: PiggyBankCardList(notifyList),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            child: FloatingActionButton(
+              heroTag: "Change Piggy Bank Goal",
+              backgroundColor: Colors.green,
+              onPressed: () {
+                Navigator.of(context)
+                    .push(MaterialPageRoute(
+                        builder: (context) => PiggyBankChangeGoalForm()))
+                    .then((value) => setState(() {}));
+              },
+              child: Icon(Icons.attach_money),
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.only(left: 16),
+            child: FloatingActionButton(
+              heroTag: "Add New",
+              onPressed: () {
+                Navigator.of(context)
+                    .push(MaterialPageRoute(
+                        builder: (context) => PiggyBankForm()))
+                    .then((value) => setState(() {}));
+              },
+              child: Icon(Icons.add),
+            ),
+          )
+        ],
       ),
     );
   }
@@ -37,6 +66,9 @@ class PiggyBankListState extends State<PiggyBankList> {
 
 class PiggyBankCardList extends StatelessWidget {
   final _piggyBankService = PiggyBankService();
+  final Function notifyParent;
+
+  PiggyBankCardList(this.notifyParent);
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +103,7 @@ class PiggyBankCardList extends StatelessWidget {
                     return ListView.builder(
                       itemBuilder: (context, index) {
                         final piggyBank = piggyBanks[index];
-                        return PiggyBankCard(piggyBank);
+                        return PiggyBankCard(piggyBank, this.notifyParent);
                       },
                       itemCount: piggyBanks.length,
                     );
@@ -84,19 +116,11 @@ class PiggyBankCardList extends StatelessWidget {
   }
 }
 
-class PiggyBankCard extends StatefulWidget {
+class PiggyBankCard extends StatelessWidget {
   final PiggyBank _piggyBank;
+  final Function notifyParent;
 
-  PiggyBankCard(this._piggyBank);
-
-  @override
-  State<StatefulWidget> createState() => PiggyBankCardState(_piggyBank);
-}
-
-class PiggyBankCardState extends State<PiggyBankCard> {
-  final PiggyBank _piggyBank;
-
-  PiggyBankCardState(this._piggyBank);
+  PiggyBankCard(this._piggyBank, this.notifyParent);
 
   @override
   Widget build(BuildContext context) {
@@ -108,7 +132,7 @@ class PiggyBankCardState extends State<PiggyBankCard> {
             Navigator.of(context)
                 .push(MaterialPageRoute(
                     builder: (context) => PiggyBankForm(piggyBank: _piggyBank)))
-                .then((value) => setState(() {}));
+                .then((value) => notifyParent());
           },
           child: PiggyBankCardContent(_piggyBank),
         ),
