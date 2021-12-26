@@ -22,7 +22,6 @@ class PiggyBankService {
 
   Future<bool> postPiggyBank(PiggyBank piggyBank) async {
     try {
-      debugPrint(jsonEncode(piggyBank.toJson()));
       await post(
           Uri.https(dotenv.env['PIGGY_BANK_API_URL'].toString(),
               dotenv.env['PIGGY_BANK_API_PATH'].toString()),
@@ -30,6 +29,23 @@ class PiggyBankService {
             'Content-Type': 'application/json; charset=UTF-8',
           },
           body: jsonEncode(piggyBank.toJson()));
+      return true;
+    } on Exception catch (e) {
+      debugPrint(e.toString());
+      return false;
+    }
+  }
+
+  Future<bool> putPiggyBank(PiggyBank piggyBank) async {
+    try {
+      var result = await put(
+          Uri.https(dotenv.env['PIGGY_BANK_API_URL'].toString(),
+              dotenv.env['PIGGY_BANK_API_PATH'].toString()),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(piggyBank.toJson()));
+      debugPrint(result.body.toString());
       return true;
     } on Exception catch (e) {
       debugPrint(e.toString());

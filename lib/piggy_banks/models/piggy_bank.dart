@@ -1,12 +1,12 @@
 class PiggyBank {
   final String id;
-  final String name;
+  String name;
 
-  final double savedValue;
-  final DateTime startDate;
+   double savedValue;
+   DateTime startDate;
 
-  final double goalValue;
-  final DateTime goalDate;
+   double goalValue;
+   DateTime goalDate;
 
   PiggyBank(this.id, this.name, this.savedValue, this.startDate, this.goalValue,
       this.goalDate);

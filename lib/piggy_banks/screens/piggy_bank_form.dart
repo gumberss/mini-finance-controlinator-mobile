@@ -23,7 +23,11 @@ class PiggyBankFormState extends State<PiggyBankForm> {
 
   final PiggyBank? piggyBank;
 
-  PiggyBankFormState({this.piggyBank});
+  PiggyBankFormState({this.piggyBank}) {
+    goalDateMilliseconds = piggyBank?.goalDate.millisecondsSinceEpoch;
+  }
+
+  int? goalDateMilliseconds;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +35,8 @@ class PiggyBankFormState extends State<PiggyBankForm> {
     if (piggyBank != null) {
       _nameCtrl.text = piggyBank!.name;
       _goalValueCtrl.text = piggyBank!.goalValue.toString();
-      _goalDateCtrl.text = piggyBank!.goalDate.millisecondsSinceEpoch.toString();
+      _goalDateCtrl.text =
+          piggyBank!.goalDate.millisecondsSinceEpoch.toString();
       alreadySavedCtrl.text = piggyBank!.savedValue.toString();
       goalDate = piggyBank!.goalDate;
     }
@@ -87,19 +92,17 @@ class PiggyBankFormState extends State<PiggyBankForm> {
                   ),
                   mode: DateTimeFieldPickerMode.date,
                   autovalidateMode: AutovalidateMode.onUserInteraction,
-                  firstDate: DateTime.now().add(const Duration(days: 1)),
+                  //firstDate: DateTime.now().add(const Duration(days: 1)),
                   initialDate: goalDate ?? DateTime.now(),
                   initialValue: goalDate ?? DateTime.now(),
-
                   validator: (e) => ((e?.millisecondsSinceEpoch ?? 0) <=
                           DateTime.now().millisecondsSinceEpoch)
                       ? 'Select a date after today'
                       : null,
                   onDateSelected: (DateTime value) {
-                    debugPrint(value.toIso8601String());
-                    _goalDateCtrl.text =
-                        value.millisecondsSinceEpoch.toString();
-                    setState(() {});
+                    setState(() {
+                      goalDateMilliseconds = value.millisecondsSinceEpoch;
+                    });
                   },
                 ),
               ),
@@ -110,9 +113,6 @@ class PiggyBankFormState extends State<PiggyBankForm> {
                   child: ElevatedButton(
                       onPressed: () async {
                         final String? name = _nameCtrl.text;
-
-                        var goalDateMilliseconds =
-                            int.tryParse(_goalDateCtrl.text);
 
                         final double? goalValue =
                             double.tryParse(_goalValueCtrl.text);
@@ -127,13 +127,26 @@ class PiggyBankFormState extends State<PiggyBankForm> {
 
                         final DateTime? goalDate =
                             DateTime.fromMillisecondsSinceEpoch(
-                                goalDateMilliseconds);
+                                goalDateMilliseconds!);
 
-                        var piggyBank = PiggyBank(Uuid().v1(), name, savedValue,
-                            startDate, goalValue, goalDate!);
+                        if (this.piggyBank == null) {
+                          var piggyBank = PiggyBank(Uuid().v1(), name,
+                              savedValue, startDate, goalValue, goalDate!);
 
-                        if (await PiggyBankService().postPiggyBank(piggyBank)) {
-                          Navigator.pop(context);
+                          if (await PiggyBankService()
+                              .postPiggyBank(piggyBank)) {
+                            Navigator.pop(context);
+                          }
+                        } else {
+                          piggyBank!.goalDate = goalDate!;
+                          piggyBank!.goalValue = goalValue;
+                          piggyBank!.savedValue = savedValue;
+                          piggyBank!.name = name;
+
+                          if (await PiggyBankService()
+                              .putPiggyBank(piggyBank!)) {
+                            Navigator.pop(context);
+                          }
                         }
                       },
                       child: Text('Create')),

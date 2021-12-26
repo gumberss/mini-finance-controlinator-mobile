@@ -15,7 +15,7 @@ class PiggyBankList extends StatefulWidget {
   }
 }
 
-class PiggyBankListState extends State<PiggyBankList>{
+class PiggyBankListState extends State<PiggyBankList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,7 +27,7 @@ class PiggyBankListState extends State<PiggyBankList>{
         onPressed: () {
           Navigator.of(context)
               .push(MaterialPageRoute(builder: (context) => PiggyBankForm()))
-              .then((value) =>  setState(() {}));
+              .then((value) => setState(() {}));
         },
         child: Icon(Icons.add),
       ),
@@ -70,8 +70,8 @@ class PiggyBankCardList extends StatelessWidget {
                     final List<PiggyBank> piggyBanks = snapshot.data!;
                     return ListView.builder(
                       itemBuilder: (context, index) {
-                        final contact = piggyBanks[index];
-                        return PiggyBankCard(contact);
+                        final piggyBank = piggyBanks[index];
+                        return PiggyBankCard(piggyBank);
                       },
                       itemCount: piggyBanks.length,
                     );
@@ -84,10 +84,19 @@ class PiggyBankCardList extends StatelessWidget {
   }
 }
 
-class PiggyBankCard extends StatelessWidget {
+class PiggyBankCard extends StatefulWidget {
   final PiggyBank _piggyBank;
 
   PiggyBankCard(this._piggyBank);
+
+  @override
+  State<StatefulWidget> createState() => PiggyBankCardState(_piggyBank);
+}
+
+class PiggyBankCardState extends State<PiggyBankCard> {
+  final PiggyBank _piggyBank;
+
+  PiggyBankCardState(this._piggyBank);
 
   @override
   Widget build(BuildContext context) {
@@ -97,7 +106,9 @@ class PiggyBankCard extends StatelessWidget {
         child: InkWell(
           onTap: () {
             Navigator.of(context)
-                .push(MaterialPageRoute(builder: (context) => PiggyBankForm(piggyBank: _piggyBank,)));
+                .push(MaterialPageRoute(
+                    builder: (context) => PiggyBankForm(piggyBank: _piggyBank)))
+                .then((value) => setState(() {}));
           },
           child: PiggyBankCardContent(_piggyBank),
         ),
@@ -174,15 +185,15 @@ class PiggyBankMoneyData extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    var diffDateInMonth = Jiffy(_piggyBank.goalDate)
-        .diff(_piggyBank.startDate, Units.MONTH);
+    var diffDateInMonth =
+        Jiffy(_piggyBank.goalDate).diff(_piggyBank.startDate, Units.MONTH);
 
     final double differenceValue = _piggyBank.goalValue - _piggyBank.savedValue;
 
-    if(diffDateInMonth == 0)  diffDateInMonth = 1;
+    if (diffDateInMonth == 0) diffDateInMonth = 1;
 
-    var differenceByMonth =  (differenceValue / diffDateInMonth).toStringAsFixed(2);
+    var differenceByMonth =
+        (differenceValue / diffDateInMonth).toStringAsFixed(2);
 
     return Padding(
       padding: EdgeInsets.only(top: 8, bottom: 8),
